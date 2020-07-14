@@ -53,6 +53,11 @@ public class GatewaySampleApplication {
 		SpringApplication.run(GatewaySampleApplication.class, args);
 	}
 
+	/**
+	 * 自定义RouteLocator
+	 * @param builder
+	 * @return
+	 */
 	@Bean
 	public RouteLocator customRouteLocator(RouteLocatorBuilder builder) {
 		//@formatter:off
