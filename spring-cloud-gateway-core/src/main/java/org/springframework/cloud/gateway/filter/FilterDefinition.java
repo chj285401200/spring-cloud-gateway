@@ -41,6 +41,12 @@ public class FilterDefinition {
 	public FilterDefinition() {
 	}
 
+	/**
+	 * 截取yml中 = 后面的配置， 逗号分隔
+	 *  filters:
+	 *         - AddRequestHeader=X-Request-Foo, Bar # ①
+	 * @param text
+	 */
 	public FilterDefinition(String text) {
 		int eqIdx = text.indexOf('=');
 		if (eqIdx <= 0) {

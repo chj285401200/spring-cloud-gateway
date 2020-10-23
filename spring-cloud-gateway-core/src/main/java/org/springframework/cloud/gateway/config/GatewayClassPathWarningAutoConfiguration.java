@@ -25,6 +25,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingClas
 import org.springframework.context.annotation.Configuration;
 
 @Configuration(proxyBeanMethods = false)
+//当前注解标识需要在GatewayAutoConfiguration前加载此配置
 @AutoConfigureBefore(GatewayAutoConfiguration.class)
 public class GatewayClassPathWarningAutoConfiguration {
 
@@ -33,6 +34,10 @@ public class GatewayClassPathWarningAutoConfiguration {
 
 	private static final String BORDER = "\n\n**********************************************************\n\n";
 
+	/**
+	 * 条件判断注解
+	 *  classpath中存在org.springframework.web.servlet.DispatcherServlet时起效，标识项目导入了spring-boot-starter-web包
+	 */
 	@Configuration(proxyBeanMethods = false)
 	@ConditionalOnClass(name = "org.springframework.web.servlet.DispatcherServlet")
 	protected static class SpringMvcFoundOnClasspathConfiguration {
@@ -45,6 +50,10 @@ public class GatewayClassPathWarningAutoConfiguration {
 
 	}
 
+	/**
+	 * classpath中不存在org.springframework.web.reactive.DispatcherHandler时起效，标识项目未导入了spring-boot-starter-webflux包
+	 *
+	 */
 	@Configuration(proxyBeanMethods = false)
 	@ConditionalOnMissingClass("org.springframework.web.reactive.DispatcherHandler")
 	protected static class WebfluxMissingFromClasspathConfiguration {

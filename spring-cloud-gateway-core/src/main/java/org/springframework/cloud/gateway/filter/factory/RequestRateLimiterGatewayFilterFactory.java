@@ -91,7 +91,9 @@ public class RequestRateLimiterGatewayFilterFactory extends
 	@SuppressWarnings("unchecked")
 	@Override
 	public GatewayFilter apply(Config config) {
+		//yml中我们配置的hostAddrKeyResolver
 		KeyResolver resolver = getOrDefault(config.keyResolver, defaultKeyResolver);
+		//这个就是限流的具体实现，默认使用RedisRateLimiter
 		RateLimiter<Object> limiter = getOrDefault(config.rateLimiter,
 				defaultRateLimiter);
 		boolean denyEmpty = getOrDefault(config.denyEmptyKey, this.denyEmptyKey);
@@ -100,6 +102,7 @@ public class RequestRateLimiterGatewayFilterFactory extends
 
 		return (exchange, chain) -> resolver.resolve(exchange).defaultIfEmpty(EMPTY_KEY)
 				.flatMap(key -> {
+					//这里的isAllowed就是具体实现，输入参数为路由id和限流key（这里为主机地址hostAddress）
 					if (EMPTY_KEY.equals(key)) {
 						if (denyEmpty) {
 							setResponseStatus(exchange, emptyKeyStatus);

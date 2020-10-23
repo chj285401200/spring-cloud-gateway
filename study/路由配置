@@ -1,0 +1,58 @@
+spring:
+  cloud:
+    gateway: # ①
+      routes: # ②
+      - id: cookie_route # ③
+        uri: http://example.org # ④
+        predicates: # ⑤
+        - Cookie=chocolate, ch.p # ⑥
+        filters: # ⑦
+        - AddRequestHeader=X-Request-Foo, Bar # ⑧
+详细说明：
+
+① “spring.cloud.gateway” 为固定前缀。
+
+② 定义路由信息列表，即可定义多个路由。
+
+③ 声明了一个 id 为 “cookie_route” 的路由。
+
+④ 定义了路由的目的地 uri，即请求转发的目的地。
+
+⑤ 声明 predicates，即请求满足相应的条件才能匹配成功。
+
+⑥ 定义了一个 Predicate，当名称为 chocolate 的 Cookie 的值匹配ch.p时 Predicate 才能够匹配，它由 CookieRoutePredicateFactory 来生产。
+
+⑦ 声明 filters，即路由转发前后处理的过滤器。
+
+⑧ 定义了一个 Filter，所有的请求转发至下游服务时会添加请求头 X-Request-Foo:Bar ，由AddRequestHeaderGatewayFilterFactory 来生产。
+
+
+2、编程方式
+通过 fluent API RouteLocatorBuilder 来构建 RouteLocator。
+
+示例（根据官方文档改造）：
+
+// static imports from GatewayFilters and RoutePredicates
+@Bean
+public RouteLocator customRouteLocator(RouteLocatorBuilder builder) { // ①
+    return builder.routes() // ②
+            .route(r -> r.host("**.abc.org").and().path("/image/png") // ③
+                .filters(f ->
+                        f.addResponseHeader("X-TestHeader", "foobar")) // ④
+                .uri("http://httpbin.org:80") // ⑤
+            )
+            .build();
+}
+① RouteLocatorBuilder bean 在 spring-cloud-starter-gateway 模块自动装配类中已经声明，可直接使用。RouteLocator 封装了对 Route 获取的定义，可简单理解成工厂模式。
+
+② RouteLocatorBuilder 可以构建多个路由信息。
+
+③ 指定了 Predicates，这里包含两个：
+
+请求头Host需要匹配**.abc.org，通过 HostRoutePredicateFactory 产生。
+请求路径需要匹配/image/png，通过 PathRoutePredicateFactory 产生。
+④ 指定了一个 Filter，下游服务响应后添加响应头X-TestHeader:foobar，通过AddResponseHeaderGatewayFilterFactory 产生。
+
+⑤ 指定路由转发的目的地 uri。
+
+如果说外部化配置完全是个黑盒，那么通过编程的方式使开发者向白盒靠近了一步。因为开发者需要使用 gateway 的 api，需要开发者对其有工作机制有所了解。

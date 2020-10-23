@@ -1,0 +1,36 @@
+1、sample样例工程，main 函数有@EnableAutoConfiguration 注解，且该项目导入了spring-cloud-gateway-core 因此会扫描其配置
+
+    spring-cloud-gateway-core  /resources/META-INF/spring.factories
+    加载配置类 org.springframework.cloud.gateway.config包下  AutoConfigureBefore  AutoConfigureAfter 决定启动顺序
+      GatewayClassPathWarningAutoConfiguration GatewayNoLoadBalancerClientAutoConfiguration
+      GatewayReactiveLoadBalancerClientAutoConfiguration GatewayRedisAutoConfiguration
+     ----->  GatewayAutoConfiguration 核心配置类
+               NettyConfiguration
+               GlobalFilter
+               FilteringWebHandler
+               GatewayProperties
+               PrefixPathGatewayFilterFactory
+               RoutePredicateFactory
+               RouteDefinitionLocator
+               RouteLocator
+               RoutePredicateHandlerMapping
+               GatewayWebfluxEndpoint
+2、交互关系：
+     请求---RoutePredicateHandlerMapping---获取Route  RouteLocator （加载Route配置 RouteDefinitionLocator）----处理Route----FilteringWebHandler----GlobalFilter
+3、网关的开启与关闭
+     @ConditionalOnProperty(name = "spring.cloud.gateway.enabled", matchIfMissing = true) 默认开启
+4、工作机制
+    1.2. Gateway 工作机制
+    Spring cloud gateway 的工作机制大体如下：
+
+    ① Gateway 接收客户端请求。
+
+    ② 客户端请求与路由信息进行匹配，匹配成功的才能够被发往相应的下游服务。
+
+    ③ 请求经过 Filter 过滤器链，执行 pre 处理逻辑，如修改请求头信息等。
+
+    ④ 请求被转发至下游服务并返回响应。
+
+    ⑤ 响应经过 Filter 过滤器链，执行 post 处理逻辑。
+
+    ⑥ 向客户端响应应答。

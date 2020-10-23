@@ -39,6 +39,15 @@ import org.springframework.web.util.UriComponentsBuilder;
 import static org.springframework.cloud.gateway.support.ServerWebExchangeUtils.toAsyncPredicate;
 
 /**
+ * ① id，标识符，区别于其他 Route。
+ *
+ * ② destination uri，路由指向的目的地 uri，即客户端请求最终被转发的目的地。
+ *
+ * ③ order，用于多个 Route 之间的排序，数值越小排序越靠前，匹配优先级越高。
+ *
+ * ④ predicate，谓语，表示匹配该 Route 的前置条件，即满足相应的条件才会被路由到目的地 uri。
+ *
+ * ⑤ gateway filters，过滤器用于处理切面逻辑，如路由转发前修改请求头等。
  * @author Spencer Gibb
  */
 public class Route implements Ordered {

@@ -158,6 +158,7 @@ import static org.springframework.cloud.gateway.config.HttpClientProperties.Pool
 import static org.springframework.cloud.gateway.config.HttpClientProperties.Pool.PoolType.FIXED;
 
 /**
+ *  enabled 控制，默认开启
  * @author Spencer Gibb
  * @author Ziemowit Stolarczyk
  */
@@ -182,20 +183,20 @@ public class GatewayAutoConfiguration {
 		return new RouteLocatorBuilder(context);
 	}
 
-	@Bean
+	@Bean //4.1  初始化 RouteDefinitionLocator
 	@ConditionalOnMissingBean
 	public PropertiesRouteDefinitionLocator propertiesRouteDefinitionLocator(
 			GatewayProperties properties) {
 		return new PropertiesRouteDefinitionLocator(properties);
 	}
 
-	@Bean
+	@Bean //4.2
 	@ConditionalOnMissingBean(RouteDefinitionRepository.class)
 	public InMemoryRouteDefinitionRepository inMemoryRouteDefinitionRepository() {
 		return new InMemoryRouteDefinitionRepository();
 	}
 
-	@Bean
+	@Bean  //4.3
 	@Primary
 	public RouteDefinitionLocator routeDefinitionLocator(
 			List<RouteDefinitionLocator> routeDefinitionLocators) {
@@ -210,7 +211,7 @@ public class GatewayAutoConfiguration {
 		return new ConfigurationService(beanFactory, conversionService, validator);
 	}
 
-	@Bean
+	@Bean //4.4 初始化 RouteLocator
 	public RouteLocator routeDefinitionRouteLocator(GatewayProperties properties,
 			List<GatewayFilterFactory> gatewayFilters,
 			List<RoutePredicateFactory> predicates,
@@ -220,7 +221,7 @@ public class GatewayAutoConfiguration {
 				gatewayFilters, properties, configurationService);
 	}
 
-	@Bean
+	@Bean // 4.5
 	@Primary
 	@ConditionalOnMissingBean(name = "cachedCompositeRouteLocator")
 	// TODO: property to disable composite?
@@ -235,7 +236,7 @@ public class GatewayAutoConfiguration {
 		return new RouteRefreshListener(publisher);
 	}
 
-	@Bean
+	@Bean //2.6 Global之后
 	public FilteringWebHandler filteringWebHandler(List<GlobalFilter> globalFilters) {
 		return new FilteringWebHandler(globalFilters);
 	}
@@ -245,7 +246,7 @@ public class GatewayAutoConfiguration {
 		return new GlobalCorsProperties();
 	}
 
-	@Bean
+	@Bean // 5.0 初始化 RoutePredicateHandlerMapping
 	public RoutePredicateHandlerMapping routePredicateHandlerMapping(
 			FilteringWebHandler webHandler, RouteLocator routeLocator,
 			GlobalCorsProperties globalCorsProperties, Environment environment) {
@@ -253,7 +254,7 @@ public class GatewayAutoConfiguration {
 				globalCorsProperties, environment);
 	}
 
-	@Bean
+	@Bean //2.7 用于加载配置文件配置的 RouteDefinition / FilterDefinition 。代码如下 ：
 	public GatewayProperties gatewayProperties() {
 		return new GatewayProperties();
 	}
@@ -298,12 +299,12 @@ public class GatewayAutoConfiguration {
 		return new RemoveCachedBodyFilter();
 	}
 
-	@Bean
+	@Bean //2.1 初始化GlobalFilter
 	public RouteToRequestUrlFilter routeToRequestUrlFilter() {
 		return new RouteToRequestUrlFilter();
 	}
 
-	@Bean
+	@Bean //2.2
 	public ForwardRoutingFilter forwardRoutingFilter(
 			ObjectProvider<DispatcherHandler> dispatcherHandler) {
 		return new ForwardRoutingFilter(dispatcherHandler);
@@ -314,13 +315,13 @@ public class GatewayAutoConfiguration {
 		return new ForwardPathFilter();
 	}
 
-	@Bean
+	@Bean //2.3
 	public WebSocketService webSocketService(
 			RequestUpgradeStrategy requestUpgradeStrategy) {
 		return new HandshakeWebSocketService(requestUpgradeStrategy);
 	}
 
-	@Bean
+	@Bean //2.4
 	public WebsocketRoutingFilter websocketRoutingFilter(WebSocketClient webSocketClient,
 			WebSocketService webSocketService,
 			ObjectProvider<List<HttpHeadersFilter>> headersFilters) {
@@ -345,6 +346,7 @@ public class GatewayAutoConfiguration {
 	 */
 
 	// Predicate Factory beans
+	//3.4 初始化  RoutePredicateFactory
 
 	@Bean
 	public AfterRoutePredicateFactory afterRoutePredicateFactory() {
@@ -414,6 +416,7 @@ public class GatewayAutoConfiguration {
 	}
 
 	// GatewayFilter Factory beans
+	// 3.0  初始化 PrefixPathGatewayFilterFactory
 
 	@Bean
 	public AddRequestHeaderGatewayFilterFactory addRequestHeaderGatewayFilterFactory() {
@@ -491,6 +494,12 @@ public class GatewayAutoConfiguration {
 		return new PrincipalNameKeyResolver();
 	}
 
+	/**
+	 * 限流
+	 * @param rateLimiter
+	 * @param resolver
+	 * @return
+	 */
 	@Bean
 	@ConditionalOnBean({ RateLimiter.class, KeyResolver.class })
 	public RequestRateLimiterGatewayFilterFactory requestRateLimiterGatewayFilterFactory(
@@ -579,6 +588,9 @@ public class GatewayAutoConfiguration {
 		return new GzipMessageBodyResolver();
 	}
 
+	/**
+	 * 底层通信netty配置 初始化	 NettyConfiguration
+	 */
 	@Configuration(proxyBeanMethods = false)
 	@ConditionalOnClass(HttpClient.class)
 	protected static class NettyConfiguration {
@@ -598,7 +610,7 @@ public class GatewayAutoConfiguration {
 			};
 		}
 
-		@Bean
+		@Bean //1.2
 		@ConditionalOnMissingBean
 		public HttpClient gatewayHttpClient(HttpClientProperties properties,
 				List<HttpClientCustomizer> customizers) {
@@ -737,20 +749,20 @@ public class GatewayAutoConfiguration {
 			return new HttpClientProperties();
 		}
 
-		@Bean
+		@Bean //1.3
 		public NettyRoutingFilter routingFilter(HttpClient httpClient,
 				ObjectProvider<List<HttpHeadersFilter>> headersFilters,
 				HttpClientProperties properties) {
 			return new NettyRoutingFilter(httpClient, headersFilters, properties);
 		}
 
-		@Bean
+		@Bean //1.4
 		public NettyWriteResponseFilter nettyWriteResponseFilter(
 				GatewayProperties properties) {
 			return new NettyWriteResponseFilter(properties.getStreamingMediaTypes());
 		}
 
-		@Bean
+		@Bean //1.5
 		public ReactorNettyWebSocketClient reactorNettyWebSocketClient(
 				HttpClientProperties properties, HttpClient httpClient) {
 			ReactorNettyWebSocketClient webSocketClient = new ReactorNettyWebSocketClient(

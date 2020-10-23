@@ -1,0 +1,7 @@
+1、导入idea后，勾选maven--profiles  spring java8 imports java8plus
+2、关闭checkstyle 主pom
+<!--			<plugin>-->
+<!--				<groupId>org.apache.maven.plugins</groupId>-->
+<!--				<artifactId>maven-checkstyle-plugin</artifactId>-->
+<!--			</plugin>-->
+3、编译 或直接启动sample中的样例

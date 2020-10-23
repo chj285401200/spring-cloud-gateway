@@ -42,6 +42,7 @@ import static org.springframework.cloud.gateway.support.NameUtils.normalizeFilte
 import static org.springframework.cloud.gateway.support.NameUtils.normalizeRoutePredicateName;
 
 /**
+ * 通过spring.cloud.gateway.discovery.locator.enabled配置注册中心查找的开启与关闭
  * @author Spencer Gibb
  */
 @Configuration(proxyBeanMethods = false)
